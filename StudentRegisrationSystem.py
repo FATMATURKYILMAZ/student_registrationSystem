@@ -22,12 +22,6 @@ root.title("Student Registration System")
 root.geometry("1250x700+210+100")
 root.config(bg=background)
 
-class Controller(tk.Frame):
-    def __init__(self, parent):
-        '''Initialises basic variables and GUI elements.'''
-        frame = tk.Frame.__init__(self, parent,relief=tk.GROOVE,width=100,height=100,bd=1)
-
-
 
 file=pathlib.Path('Student_data.xlsx')
 if file.exists():
@@ -50,17 +44,121 @@ else:
     
     file.save('Student_data.xlsx')
     
-#Exit
+##########Exit Window#################
 def Exit():
     root.destroy()
-    
+ ################Show Image#################   
 def showimage():
-    filename=filedialog.askopenfile()
+    filename=filedialog.askopenfilename(initialdir=os.getcwd(),
+                                        title="Select image file",filetype=(("JPG File",".jpg"),
+    ("PNG File",".png"),("All files",".txt")))
+    
+    img=(Image.open(filename))
+    resized_image=img.resize((190,190))
+    photo2=ImageTk.PhotoImage(resized_image)
+    lbl.config(image=photo2)
+    lbl.image=photo2
+
+############Registration NO################
+def registration_no():
+    file=openpyxl.load_workbook('Student_data.xlsx')
+    sheet=file.active
+    row=sheet.max_row
+    max_row_value=sheet.cell(row=row, column=1).value
+    print(max_row_value)
+    try:
+        Registration.set(max_row_value+1)
+    except:
+        Registration.set("1")
+        
+############Clear###########
+def Clear():
+    Name.set('')
+    DBO.set('')
+    Religion.set('')
+    Skills.set('')
+    F_Name.set('')
+    M_Name.set('')
+    Father_occupation.set('')
+    Mother_occupation.set('')
+    Class.set("Select Class")
+    
+    registration_no()
+    
+    saveButton.config(state='normal')
+    
+    img1=PhotoImage(file='Images/userr.png')
+    lbl.config(image=img1)
+    lbl.image=img1
+    img=""
     
     
+############Save################
+def Save():
+    R1=Registration.get()
+    N1=Name.get()
+    C1=Class.get()
+    try:
+        G1=gender
+    except:
+        messagebox.showerror("error","Select Gender")
     
+    D2=DOB.get()
+    D1=Date.get()
+    Rel=Religion.get()
+    S1=Skills.get()
+    fathername=F_Name.get()
+    mothername=M_Name.get()
+    F1=Father_occupation.get()
+    M1=Mother_occupation.get()
+    
+    if N1=="" or C1=="Select Class" or D2=="" or Rel=="" or S1=="" or fathername=="" or mothername=="" or F1=="" or M1=="":
+        messagebox.showerror("error","Few Data is missing!")
+        
+    else:
+        file=openpyxl.load_workbook('Student_data.xlsx')
+        sheet=file.active
+        sheet.cell(column=1,row=sheet.max_row+1,value=R1)
+        sheet.cell(column=2,row=sheet.max_row+1,value=N1)
+        sheet.cell(column=3,row=sheet.max_row+1,value=C1)
+        sheet.cell(column=4,row=sheet.max_row+1,value=G1)
+        sheet.cell(column=5,row=sheet.max_row+1,value=D2)
+        sheet.cell(column=6,row=sheet.max_row+1,value=D1)
+        sheet.cell(column=7,row=sheet.max_row+1,value=Rel)
+        sheet.cell(column=8,row=sheet.max_row+1,value=S1)
+        sheet.cell(column=9,row=sheet.max_row+1,value=fathername)
+        sheet.cell(column=10,row=sheet.max_row+1,value=mothername)
+        sheet.cell(column=11,row=sheet.max_row+1,value=F1)
+        sheet.cell(column=12,row=sheet.max_row+1,value=M1)
+        
+        file.save(r'Student_data.xlsx')
+        
+        try:
+            img.save("Student Images/"+str(R1)+".jpg")
+        except:
+            messagebox.showinfo("info","Profile picture is not avilable!!")
+            
+        messagebox.showinfo("info","Sucessfully data entered!!")
+        Clear()
+        registration_no()
+        print(R1)
+        print(N1)
+        print(C1)
+        print(G1)
+        print(D2)
+        print(D1)
+        print(Rel)
+        print(S1)
+        print(fathername)
+        print(mothername)
+        print(F1)
+        print(M1)
+    
+        
+
 #gender
 def selection():
+    global gender
     value=radio.get()
     if value==1:
         gender="Male"
@@ -89,13 +187,14 @@ update_button.place(x=110,y=64)
 Label(root,text="Registration No:",font="arial 13",fg=framebg,bg=background).place(x=30,y=150)
 Label(root,text="Date:",font="arial 13",fg=framebg,bg=background).place(x=500,y=150)
 
-Registration=StringVar()
+Registration=IntVar()
 Date=StringVar()
 
 reg_entry=Entry(root,textvariable=Registration,width=15,font="arial 10")
 reg_entry.place(x=160,y=150)
 
-#registration_no()
+registration_no()
+
 today=date.today()
 d1=today.strftime("%d/%m/%Y")
 date_entry=Entry(root,textvariable=Date,width=15,font="arial 10")
@@ -119,7 +218,7 @@ name_entry=Entry(obj,textvariable=Name,width=20,font="arial 10")
 name_entry.place(x=160,y=50)
 
 DBO=StringVar()
-dbo_entry=Entry(obj,textvariable=Name,width=20,font="arial 10")
+dbo_entry=Entry(obj,textvariable=DBO,width=20,font="arial 10")
 dbo_entry.place(x=160,y=100)
 
 radio=IntVar()
@@ -130,11 +229,11 @@ R1=Radiobutton(obj,text="Female",variable=radio,value=2,bg=framebg,fg=framefg,co
 R1.place(x=200,y=150)
 
 Religion=StringVar()
-regilion_entry=Entry(obj,textvariable=Name,width=20,font="arial 10")
+regilion_entry=Entry(obj,textvariable=Religion,width=20,font="arial 10")
 regilion_entry.place(x=630,y=100)
 
 Skills=StringVar()
-skill_entry=Entry(obj,textvariable=Name,width=20,font="arial 10")
+skill_entry=Entry(obj,textvariable=Skills,width=20,font="arial 10")
 skill_entry.place(x=630,y=150)
 
 Class=Combobox(obj,values=['1','2','3','4','5','6','7','8','9','10','11','12'],font="Roboto 10",width=17,state="r")
@@ -181,9 +280,9 @@ lbl.place(x=0,y=0)
 
 #button
 Button(root,text="Upload",width=19,height=2,font="arila 12 bold",bg="lightblue",command=showimage).place(x=1000,y=370)
-saveButton=Button(root,text="Save",width=19,height=2,font="arila 12 bold",bg="lightgreen")
+saveButton=Button(root,text="Save",width=19,height=2,font="arila 12 bold",bg="lightgreen",command=Save)
 saveButton.place(x=1000,y=450)
-Button(root,text="Reset",width=19,height=2,font="arila 12 bold",bg="lightpink").place(x=1000,y=530)
+Button(root,text="Reset",width=19,height=2,font="arila 12 bold",bg="lightpink",command=Clear).place(x=1000,y=530)
 Button(root,text="Exit",width=19,height=2,font="arila 12 bold",bg="grey",command=Exit).place(x=1000,y=610)
 
 
